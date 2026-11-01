@@ -3,7 +3,7 @@ repeat task.wait(0.1) until game:IsLoaded()
 
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
-
+a
 local player = Players.LocalPlayer or Players:GetPropertyChangedSignal("LocalPlayer"):Wait()
 if not player then
 	repeat task.wait(0.1) player = Players.LocalPlayer until player
