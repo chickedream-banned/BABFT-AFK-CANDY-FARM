@@ -255,6 +255,7 @@ if firetouchinterest then firetouchinterest(hrp, trig, 0) firetouchinterest(hrp,
 end
 if Workspace:FindFirstChild("ClaimRiverResultsGold") then Workspace.ClaimRiverResultsGold:FireServer() end
 end)
+end)
 local function updateTimerDisplay()
 if (isRunning or isGoldRunning) and farmStartTime > 0 then
 local elapsed = os.time() - farmStartTime
@@ -614,7 +615,7 @@ goldFarmThread = task.spawn(runGoldFarmLoop)
 end
 toggleBtn.MouseButton1Click:Connect(function() if isRunning then stopFarm() else startFarm() end end)
 goldFarmBtn.MouseButton1Click:Connect(function() if isGoldRunning then stopGoldFarm() else startGoldFarm() end end
--- testcreateHeader(pages.Player, "CHARACTER MOVEMENT & COMBAT", 1)
+createHeader(pages.Player, "CHARACTER MOVEMENT & COMBAT", 1)
 local speedLabel = create("TextLabel", { LayoutOrder = 2, Size = UDim2.new(1, 0, 0, 18), BackgroundTransparency = 1, Text = string.format("WalkSpeed: %d | JumpPower: %d | Fly: %d", customWalkSpeed, customJumpPower, customFlySpeed), TextColor3 = Color3.fromRGB(180, 200, 230), TextSize = 10, Font = Enum.Font.GothamMedium, ZIndex = 8 }, pages.Player)
 local function refreshSpeedText()
 speedLabel.Text = string.format("WalkSpeed: %d | JumpPower: %d | Fly: %d", customWalkSpeed, customJumpPower, customFlySpeed)
@@ -818,7 +819,8 @@ pcall(function()
 local z = getPlayerTeamZone(player)
 if z and z:FindFirstChild("VoteLaunchRE") then z.VoteLaunchRE:FireServer() end
 end)
-end, 9))createHeader(pages.Builder, "PROCEDURAL 3D SPHERE & SHAPES", 1)
+end, 9)
+createHeader(pages.Builder, "PROCEDURAL 3D SPHERE & SHAPES", 1)
 local buildMaterials = { "WoodBlock", "StoneBlock", "GoldBlock", "TitaniumBlock", "ObsidianBlock", "IronBlock", "MarbleBlock", "ConcreteBlock", "BrickBlock", "GlassBlock", "NeonBlock", "PlasticBlock" }
 local matIdx = 1
 createBtn(pages.Builder, "MATERIAL: WOODBLOCK", Color3.fromRGB(32, 36, 52), Color3.fromRGB(160, 210, 255), 2, function(b)
