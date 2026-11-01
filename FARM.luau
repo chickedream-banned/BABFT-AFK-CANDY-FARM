@@ -15,6 +15,9 @@ local player = Players.LocalPlayer or Players:GetPropertyChangedSignal("LocalPla
 if not player then
 repeat task.wait(0.1) player = Players.LocalPlayer until player
 end
+if not player.Team then
+repeat task.wait(0.1) until player.Team
+end
 local existingGui = CoreGui:FindFirstChild("BABFT_CandyFarm") or (player:FindFirstChild("PlayerGui") and player.PlayerGui:FindFirstChild("BABFT_CandyFarm"))
 if existingGui then
 pcall(function() existingGui:Destroy() end)
@@ -78,7 +81,11 @@ for k, v in pairs(props) do inst[k] = v end
 if parent then inst.Parent = parent end
 return inst
 end
-local screenGui = create("ScreenGui", { Name = "BABFT_CandyFarm", ResetOnSpawn = false, ZIndexBehavior = Enum.ZIndexBehavior.Sibling }, targetParent)
+local screenGui = create("ScreenGui", {
+Name = "BABFT_CandyFarm",
+ResetOnSpawn = false,
+ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+}, targetParent)
 local vfxBlur = create("BlurEffect", { Name = "BABFT_FarmBlur", Size = 0 }, Lighting)
 local function triggerMotionBlur(peakSize, duration)
 task.spawn(function()
@@ -92,21 +99,44 @@ local defaultPos = UDim2.new(0.5, 0, 0.48, 0)
 if savedSettings.posX and savedSettings.posY then
 defaultPos = UDim2.new(savedSettings.posX.Scale or 0.5, savedSettings.posX.Offset or 0, savedSettings.posY.Scale or 0.48, savedSettings.posY.Offset or 0)
 end
-local windowRoot = create("Frame", { Name = "WindowRoot", AnchorPoint = Vector2.new(0.5, 0.5), Size = UDim2.new(0, 320, 0, 220), Position = defaultPos, BackgroundTransparency = 1, BorderSizePixel = 0, Active = false, ZIndex = 1 }, screenGui)
+local windowRoot = create("Frame", {
+Name = "WindowRoot",
+AnchorPoint = Vector2.new(0.5, 0.5),
+Size = UDim2.new(0, 320, 0, 220),
+Position = defaultPos,
+BackgroundTransparency = 1,
+BorderSizePixel = 0,
+Active = false,
+ZIndex = 1
+}, screenGui)
 local function saveCurrentSettings()
 if writefile then
 local data = {
-enabled = isRunning, goldEnabled = isGoldRunning, startTime = farmStartTime, housesCount = housesCount,
-goldRunsCount = goldRunsCount, totalGoldEarned = totalGoldEarned, stageDelay = stageDelay,
-soundMuted = soundMuted, optEnabled = optEnabled, antiAfkEnabled = antiAfkEnabled,
-walkOnWaterEnabled = walkOnWaterEnabled, godModeEnabled = godModeEnabled, infJumpEnabled = infJumpEnabled,
-espEnabled = espEnabled, fullbrightEnabled = fullbrightEnabled, selectedChestName = selectedChestName,
-selectedChestQty = selectedChestQty, customWalkSpeed = customWalkSpeed, customJumpPower = customJumpPower,
-customFlySpeed = customFlySpeed, customBoatSpeed = customBoatSpeed,
+enabled = isRunning,
+goldEnabled = isGoldRunning,
+startTime = farmStartTime,
+housesCount = housesCount,
+goldRunsCount = goldRunsCount,
+totalGoldEarned = totalGoldEarned,
+stageDelay = stageDelay,
+soundMuted = soundMuted,
+optEnabled = optEnabled,
+antiAfkEnabled = antiAfkEnabled,
+walkOnWaterEnabled = walkOnWaterEnabled,
+godModeEnabled = godModeEnabled,
+infJumpEnabled = infJumpEnabled,
+espEnabled = espEnabled,
+fullbrightEnabled = fullbrightEnabled,
+selectedChestName = selectedChestName,
+selectedChestQty = selectedChestQty,
+customWalkSpeed = customWalkSpeed,
+customJumpPower = customJumpPower,
+customFlySpeed = customFlySpeed,
+customBoatSpeed = customBoatSpeed,
 posX = { Scale = windowRoot.Position.X.Scale, Offset = windowRoot.Position.X.Offset },
 posY = { Scale = windowRoot.Position.Y.Scale, Offset = windowRoot.Position.Y.Offset }
 }
-pcall(function() writefile(stateFilePath, HttpService:JSONDecode(data)) end)
+pcall(function() writefile(stateFilePath, HttpService:JSONEncode(data)) end)
 end
 end
 local function applySoundSetting(muted)
@@ -145,7 +175,11 @@ ColorSequenceKeypoint.new(0.3, Color3.fromRGB(180, 0, 255)),
 ColorSequenceKeypoint.new(0.65, Color3.fromRGB(0, 185, 255)),
 ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 85, 0))
 })
-local softShadow = create("ImageLabel", { Name = "SoftShadow", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(0.5, 0, 0.5, 0), Size = UDim2.new(1, 64, 1, 64), BackgroundTransparency = 1, Image = "rbxassetid://6015897843", ImageTransparency = 0.35, ScaleType = Enum.ScaleType.Slice, SliceCenter = Rect.new(49, 49, 450, 450), ZIndex = 1 }, glowHolder)
+local softShadow = create("ImageLabel", {
+Name = "SoftShadow", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(0.5, 0, 0.5, 0),
+Size = UDim2.new(1, 64, 1, 64), BackgroundTransparency = 1, Image = "rbxassetid://6015897843",
+ImageTransparency = 0.35, ScaleType = Enum.ScaleType.Slice, SliceCenter = Rect.new(49, 49, 450, 450), ZIndex = 1
+}, glowHolder)
 table.insert(glowGradients, create("UIGradient", { Color = gradSeq }, softShadow))
 for _, layer in ipairs({ {2, 0.2}, {6, 0.4}, {11, 0.65}, {18, 0.8}, {26, 0.92} }) do
 local lf = create("Frame", { Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, ZIndex = 1 }, glowHolder)
@@ -157,13 +191,28 @@ local glowConnection = RunService.RenderStepped:Connect(function()
 local rot = (tick() * 100) % 360
 for _, grad in ipairs(glowGradients) do grad.Rotation = rot end
 end)
-local mainFrame = create("CanvasGroup", { Name = "MainFrame", Size = UDim2.new(1, 0, 1, 0), GroupTransparency = 1, BackgroundColor3 = Color3.fromRGB(14, 14, 18), BorderSizePixel = 0, Active = true, ZIndex = 5 }, windowRoot)
+local mainFrame = create("CanvasGroup", {
+Name = "MainFrame", Size = UDim2.new(1, 0, 1, 0), GroupTransparency = 1,
+BackgroundColor3 = Color3.fromRGB(14, 14, 18), BorderSizePixel = 0, Active = true, ZIndex = 5
+}, windowRoot)
 create("UICorner", { CornerRadius = UDim.new(0, 14) }, mainFrame)
 local titleBar = create("Frame", { Name = "TitleBar", Size = UDim2.new(1, 0, 0, 36), BackgroundColor3 = Color3.fromRGB(20, 20, 26), BorderSizePixel = 0, ZIndex = 6 }, mainFrame)
-create("TextLabel", { Name = "TitleLabel", Size = UDim2.new(1, -110, 1, 0), Position = UDim2.new(0, 14, 0, 0), BackgroundTransparency = 1, Text = "BABFT SWISS ARMY HUB | Chickedream", TextColor3 = Color3.fromRGB(245, 245, 250), TextSize = 13, Font = Enum.Font.GothamBold, TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 7 }, titleBar)
-local minBtn = create("TextButton", { Name = "MinButton", Size = UDim2.new(0, 24, 0, 24), Position = UDim2.new(1, -62, 0, 6), BackgroundColor3 = Color3.fromRGB(32, 32, 42), BorderSizePixel = 0, Text = "-", TextColor3 = Color3.fromRGB(210, 210, 220), TextSize = 14, Font = Enum.Font.GothamBold, AutoButtonColor = false, ZIndex = 8 }, titleBar)
+create("TextLabel", {
+Name = "TitleLabel", Size = UDim2.new(1, -110, 1, 0), Position = UDim2.new(0, 14, 0, 0), BackgroundTransparency = 1,
+Text = "BABFT SWISS ARMY HUB | Chickedream", TextColor3 = Color3.fromRGB(245, 245, 250), TextSize = 13,
+Font = Enum.Font.GothamBold, TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 7
+}, titleBar)
+local minBtn = create("TextButton", {
+Name = "MinButton", Size = UDim2.new(0, 24, 0, 24), Position = UDim2.new(1, -62, 0, 6),
+BackgroundColor3 = Color3.fromRGB(32, 32, 42), BorderSizePixel = 0, Text = "-",
+TextColor3 = Color3.fromRGB(210, 210, 220), TextSize = 14, Font = Enum.Font.GothamBold, AutoButtonColor = false, ZIndex = 8
+}, titleBar)
 create("UICorner", { CornerRadius = UDim.new(0, 7) }, minBtn)
-local closeBtn = create("TextButton", { Name = "CloseButton", Size = UDim2.new(0, 24, 0, 24), Position = UDim2.new(1, -32, 0, 6), BackgroundColor3 = Color3.fromRGB(48, 22, 26), BorderSizePixel = 0, Text = "X", TextColor3 = Color3.fromRGB(255, 140, 150), TextSize = 11, Font = Enum.Font.GothamBold, AutoButtonColor = false, ZIndex = 8 }, titleBar)
+local closeBtn = create("TextButton", {
+Name = "CloseButton", Size = UDim2.new(0, 24, 0, 24), Position = UDim2.new(1, -32, 0, 6),
+BackgroundColor3 = Color3.fromRGB(48, 22, 26), BorderSizePixel = 0, Text = "X",
+TextColor3 = Color3.fromRGB(255, 140, 150), TextSize = 11, Font = Enum.Font.GothamBold, AutoButtonColor = false, ZIndex = 8
+}, titleBar)
 create("UICorner", { CornerRadius = UDim.new(0, 7) }, closeBtn)
 local sidebar = create("Frame", { Name = "Sidebar", Size = UDim2.new(0, 118, 1, -36), Position = UDim2.new(0, 0, 0, 36), BackgroundColor3 = Color3.fromRGB(18, 18, 24), BorderSizePixel = 0, ZIndex = 6 }, mainFrame)
 create("UIListLayout", { Padding = UDim.new(0, 5), HorizontalAlignment = Enum.HorizontalAlignment.Center, SortOrder = Enum.SortOrder.LayoutOrder }, sidebar)
@@ -180,23 +229,43 @@ TextColor3 = (k == name) and Color3.fromRGB(130, 195, 255) or Color3.fromRGB(160
 }):Play()
 end
 end
-local tabList = { { "Farms", "AUTO FARMS" }, { "Player", "PLAYER & BOAT" }, { "World", "WORLD & TEAMS" }, { "Shop", "SHOP & QUESTS" }, { "Builder", "BUILD & CLONE" }, { "System", "SYSTEM & HOP" } }
+local tabList = {
+{ "Farms", "AUTO FARMS" }, { "Player", "PLAYER & BOAT" }, { "World", "WORLD & TEAMS" },
+{ "Shop", "SHOP & QUESTS" }, { "Builder", "BUILD & CLONE" }, { "System", "SYSTEM & HOP" }
+}
 for idx, t in ipairs(tabList) do
-local page = create("ScrollingFrame", { Name = t[1] .. "Page", Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, BorderSizePixel = 0, ScrollBarThickness = 3, ScrollBarImageColor3 = Color3.fromRGB(90, 120, 255), Visible = false, ZIndex = 7 }, pageContainer)
+local page = create("ScrollingFrame", {
+Name = t[1] .. "Page", Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, BorderSizePixel = 0,
+ScrollBarThickness = 3, ScrollBarImageColor3 = Color3.fromRGB(90, 120, 255), Visible = false, ZIndex = 7
+}, pageContainer)
 local layout = create("UIListLayout", { Padding = UDim.new(0, 6), HorizontalAlignment = Enum.HorizontalAlignment.Center, SortOrder = Enum.SortOrder.LayoutOrder }, page)
 create("UIPadding", { PaddingTop = UDim.new(0, 10), PaddingBottom = UDim.new(0, 12), PaddingLeft = UDim.new(0, 10), PaddingRight = UDim.new(0, 10) }, page)
-layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() page.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 24) end)
+layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+page.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 24)
+end)
 pages[t[1]] = page
-local tBtn = create("TextButton", { Name = t[1] .. "Tab", LayoutOrder = idx, Size = UDim2.new(1, -14, 0, 32), BackgroundColor3 = Color3.fromRGB(24, 24, 32), BorderSizePixel = 0, Text = t[2], TextColor3 = Color3.fromRGB(160, 165, 180), TextSize = 10, Font = Enum.Font.GothamBold, AutoButtonColor = false, ZIndex = 7 }, sidebar)
+local tBtn = create("TextButton", {
+Name = t[1] .. "Tab", LayoutOrder = idx, Size = UDim2.new(1, -14, 0, 32), BackgroundColor3 = Color3.fromRGB(24, 24, 32),
+BorderSizePixel = 0, Text = t[2], TextColor3 = Color3.fromRGB(160, 165, 180), TextSize = 10,
+Font = Enum.Font.GothamBold, AutoButtonColor = false, ZIndex = 7
+}, sidebar)
 create("UICorner", { CornerRadius = UDim.new(0, 7) }, tBtn)
 tBtn.MouseButton1Click:Connect(function() switchTab(t[1]) end)
 tabButtons[t[1]] = tBtn
 end
 local function createHeader(parent, text, order)
-return create("TextLabel", { LayoutOrder = order, Size = UDim2.new(1, 0, 0, 18), BackgroundTransparency = 1, Text = text, TextColor3 = Color3.fromRGB(115, 145, 215), TextSize = 10, Font = Enum.Font.GothamBold, TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 8 }, parent)
+return create("TextLabel", {
+LayoutOrder = order, Size = UDim2.new(1, 0, 0, 18), BackgroundTransparency = 1, Text = text,
+TextColor3 = Color3.fromRGB(115, 145, 215), TextSize = 10, Font = Enum.Font.GothamBold,
+TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 8
+}, parent)
 end
 local function createBtn(parent, text, bg, tc, order, cb)
-local b = create("TextButton", { LayoutOrder = order, Size = UDim2.new(1, 0, 0, 32), BackgroundColor3 = bg or Color3.fromRGB(26, 30, 40), BorderSizePixel = 0, Text = text, TextColor3 = tc or Color3.fromRGB(220, 225, 240), TextSize = 11, Font = Enum.Font.GothamBold, AutoButtonColor = false, ZIndex = 8 }, parent)
+local b = create("TextButton", {
+LayoutOrder = order, Size = UDim2.new(1, 0, 0, 32), BackgroundColor3 = bg or Color3.fromRGB(26, 30, 40),
+BorderSizePixel = 0, Text = text, TextColor3 = tc or Color3.fromRGB(220, 225, 240), TextSize = 11,
+Font = Enum.Font.GothamBold, AutoButtonColor = false, ZIndex = 8
+}, parent)
 create("UICorner", { CornerRadius = UDim.new(0, 7) }, b)
 local s = create("UIStroke", { Thickness = 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border, Color = Color3.fromRGB(48, 56, 75) }, b)
 b.MouseButton1Click:Connect(function() cb(b, s) end)
@@ -204,10 +273,16 @@ return b, s
 end
 local function createRow(parent, t1, cb1, t2, cb2, order)
 local row = create("Frame", { LayoutOrder = order, Size = UDim2.new(1, 0, 0, 30), BackgroundTransparency = 1, ZIndex = 8 }, parent)
-local b1 = create("TextButton", { Size = UDim2.new(0.5, -3, 1, 0), BackgroundColor3 = Color3.fromRGB(25, 30, 40), BorderSizePixel = 0, Text = t1, TextColor3 = Color3.fromRGB(205, 215, 235), TextSize = 10, Font = Enum.Font.GothamBold, AutoButtonColor = false, ZIndex = 8 }, row)
+local b1 = create("TextButton", {
+Size = UDim2.new(0.5, -3, 1, 0), BackgroundColor3 = Color3.fromRGB(25, 30, 40), BorderSizePixel = 0,
+Text = t1, TextColor3 = Color3.fromRGB(205, 215, 235), TextSize = 10, Font = Enum.Font.GothamBold, AutoButtonColor = false, ZIndex = 8
+}, row)
 create("UICorner", { CornerRadius = UDim.new(0, 6) }, b1)
 local s1 = create("UIStroke", { Thickness = 1, Color = Color3.fromRGB(45, 55, 75) }, b1)
-local b2 = create("TextButton", { Size = UDim2.new(0.5, -3, 1, 0), Position = UDim2.new(0.5, 3, 0, 0), BackgroundColor3 = Color3.fromRGB(25, 30, 40), BorderSizePixel = 0, Text = t2, TextColor3 = Color3.fromRGB(205, 215, 235), TextSize = 10, Font = Enum.Font.GothamBold, AutoButtonColor = false, ZIndex = 8 }, row)
+local b2 = create("TextButton", {
+Size = UDim2.new(0.5, -3, 1, 0), Position = UDim2.new(0.5, 3, 0, 0), BackgroundColor3 = Color3.fromRGB(25, 30, 40),
+BorderSizePixel = 0, Text = t2, TextColor3 = Color3.fromRGB(205, 215, 235), TextSize = 10, Font = Enum.Font.GothamBold, AutoButtonColor = false, ZIndex = 8
+}, row)
 create("UICorner", { CornerRadius = UDim.new(0, 6) }, b2)
 local s2 = create("UIStroke", { Thickness = 1, Color = Color3.fromRGB(45, 55, 75) }, b2)
 b1.MouseButton1Click:Connect(function() cb1(b1, s1) end)
@@ -342,8 +417,7 @@ local cursor = ""
 local pagesChecked = 0
 while pagesChecked < 4 do
 pagesChecked = pagesChecked + 1
-local proto = "https" .. "://" .. "games." .. "roblox." .. "com/v1/games/"
-local url = proto .. tostring(placeId) .. "/servers/Public?sortOrder=" .. sortOrder .. "&limit=100" .. (cursor ~= "" and ("&cursor=" .. cursor) or "")
+local url = "https://games.roblox.com/v1/games/" .. tostring(placeId) .. "/servers/Public?sortOrder=" .. sortOrder .. "&limit=100" .. (cursor ~= "" and ("&cursor=" .. cursor) or "")
 local success, raw = pcall(requestHttp, url)
 if success and raw and #raw > 10 then
 local parseSuccess, data = pcall(function() return HttpService:JSONDecode(raw) end)
@@ -614,7 +688,7 @@ goldFarmStroke.Color = Color3.fromRGB(120, 45, 52)
 goldFarmThread = task.spawn(runGoldFarmLoop)
 end
 toggleBtn.MouseButton1Click:Connect(function() if isRunning then stopFarm() else startFarm() end end)
-goldFarmBtn.MouseButton1Click:Connect(function() if isGoldRunning then stopGoldFarm() else startGoldFarm() end end
+goldFarmBtn.MouseButton1Click:Connect(function() if isGoldRunning then stopGoldFarm() else startGoldFarm() end end)
 createHeader(pages.Player, "CHARACTER MOVEMENT & COMBAT", 1)
 local speedLabel = create("TextLabel", { LayoutOrder = 2, Size = UDim2.new(1, 0, 0, 18), BackgroundTransparency = 1, Text = string.format("WalkSpeed: %d | JumpPower: %d | Fly: %d", customWalkSpeed, customJumpPower, customFlySpeed), TextColor3 = Color3.fromRGB(180, 200, 230), TextSize = 10, Font = Enum.Font.GothamMedium, ZIndex = 8 }, pages.Player)
 local function refreshSpeedText()
@@ -801,7 +875,10 @@ task.wait(1.5)
 end
 end)
 createHeader(pages.Shop, "QUEST MAKER & LAUNCHER", 6)
-local questList = { { "Cloud Quest", 1 }, { "Target Quest", 2 }, { "Ramp Quest", 3 }, { "Find Me Quest", 4 }, { "Dragon Quest", 5 }, { "The Box Quest", 6 }, { "Thin Ice Quest", 7 }, { "Soccer Quest", 8 }, { "Nutcracker Quest", 101 } }
+local questList = {
+{ "Cloud Quest", 1 }, { "Target Quest", 2 }, { "Ramp Quest", 3 }, { "Find Me Quest", 4 },
+{ "Dragon Quest", 5 }, { "The Box Quest", 6 }, { "Thin Ice Quest", 7 }, { "Soccer Quest", 8 }, { "Nutcracker Quest", 101 }
+}
 local qIdx = 1
 createBtn(pages.Shop, "QUEST: " .. questList[qIdx][1]:upper(), nil, nil, 7, function(b)
 qIdx = (qIdx % #questList) + 1
