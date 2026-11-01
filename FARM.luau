@@ -603,14 +603,14 @@ local function serverHop()
 	markVisited(chosenTarget)
 
 	local initFailedConn
-	initFailedConn = TeleportService.TeleportInitFailed:Connect(function()
+	pcall(function() if TeleportService.TeleportInitFailed then initFailedConn = TeleportService.TeleportInitFailed:Connect(function()
 		if initFailedConn then
-			initFailedConn:Disconnect()
+			pcall(function() initFailedConn:Disconnect() end)
 		end
 		isHopping = false
 		task.wait(1)
 		serverHop()
-	end)
+	end) end end)
 
 	task.spawn(function()
 		task.wait(12)
@@ -623,7 +623,7 @@ local function serverHop()
 		end
 	end)
 
-	TeleportService:TeleportToPlaceInstance(placeId, chosenTarget, player)
+	pcall(function() TeleportService:TeleportToPlaceInstance(placeId, chosenTarget, player) end)
 end
 
 local function getTargetCFrame(instance)
